@@ -13,6 +13,7 @@
 
 # Debug folder (i think its uneccessary
 Debug/*
+Release/*
 
 # Project Properties, so every platform can keep its own toolchain
 .cproject

@@ -4,6 +4,14 @@
 
 #include <vector>
 
+#ifdef linux
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <climits>
+#include <string.h>
+#endif /*linux*/
+
 using namespace std;
 
 
@@ -640,7 +648,7 @@ public:
 					i++;
 				}	
 
-				data[dim * i + j++] = atol(p);		
+				data[dim * i + j++] = atol(p);
 
 				p = strtok(NULL, " \t\n");	
 			}
