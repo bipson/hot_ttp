@@ -17,6 +17,8 @@ Release/*
 
 # Project Properties, so every platform can keep its own toolchain
 .cproject
+.project
+.pydevproject
 # don't know why this appears only on the mac
 .settings/*
 # makefile is affected by toolchain as well
