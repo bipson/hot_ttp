@@ -22,6 +22,8 @@
 #City names are in the order ATL NYM PHI MON FLA PIT CIN CHI STL MIL HOU COL SF SD LA ARI where NLx takes the first x cities.
 #Data files contain the distance matrix (square, symmetric).
 
+#edit versuch
+
 import math
 import random
 import itertools
