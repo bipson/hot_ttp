@@ -28,7 +28,7 @@ import itertools
 import copy
 from collections import defaultdict
 
-dim = 8
+dim = 6
 
 class Game:
     def __init__(self, m_home, m_away):
@@ -339,23 +339,23 @@ class Solution:
         if self.get_games(week_before) == set():
             return t_max
         else:
-            t1 = (game.m_away, self.get_game(week_before, game.m_away).m_home)
-            t2 = (game.m_home, self.get_game(week_before, game.m_home).m_home)
-            t_both = (t1, t2)
-            return pheromones[t_both]
-            #return (pheromones[t1] + pheromones[t2] ) / 2
+            sum = 0
+            for g_before in self.get_games(week_before):
+                #print("g: ", g)
+                #print("before: ", week_before, g_before)
+                sum += pheromones[g_before, g]
+            return sum/2
     
-    def update_pheromones(self, pheromones):
+    def update_pheromones(self, pheromones, val):
         for week in range(1, 2 * (self.dim) - 1):
             week_before = ((week-2) % (2 * (dim - 1))) + 1
                         
             for g in self.get_games(week):
-                t1 = (g.m_away, self.get_game(week_before, g.m_away).m_home)
-                t2 = (g.m_home, self.get_game(week_before, g.m_home).m_home)
-                t_both = (t1, t2)
-                #pheromones[t1] *= 1.1
-                #pheromones[t2] *= 1.1
-                pheromones[t_both] *= 1.1
+                for g_before in self.get_games(week_before):
+                    #print("g: ",week, g)
+                    #print("before: ", week_before, g_before)
+                    t = (g_before, g)
+                    pheromones[t] *= 1.2
                 
     def __hash__(self):
         return hash(tuple(map(tuple, self.plan)))
@@ -366,14 +366,14 @@ random.seed()
 
 iterations = 0
 
-stopping_criteria = lambda: iterations > 50
+stopping_criteria = lambda: iterations > 40
 
 
 (t_min, t_max) = (1.0, 10.0)
-(stench_power, local_info_power) = 8, 2
+(stench_power, local_info_power) = 2, 1
 pheromones = defaultdict(lambda: t_max)
 
-num_ants = 10
+num_ants = dim * 3
 
 while not stopping_criteria():
     
@@ -420,19 +420,19 @@ while not stopping_criteria():
         val = s.evaluate() # if possible to evaluate solution
         if val != None and val < best_solution_value: # update bestw
             best_solution, best_solution_value = s, val
-            print(best_solution)
             print(val)
     
     if best_solution.is_complete:        
-        #pheromones[best_solution] += 1000/best_solution_value # update pheromones
-        #pheromones[best_solution] += pheromones[best_solution]/10 # update pheromones
-        best_solution.update_pheromones(pheromones)
+        best_solution.update_pheromones(pheromones, val)
+            
+    #pheromones[best_solution] += 1000/best_solution_value # update pheromones
     
     for i in pheromones: # evaporate pheromones
-        pheromones[i] *= 0.9
+        pheromones[i] *= 0.8
     
     iterations += 1
     
+print(val)
 print(pheromones)
      
 #===============================================================================
