@@ -28,7 +28,7 @@ import itertools
 import copy
 from collections import defaultdict
 
-dim = 4
+dim = 8
 
 class Game:
     def __init__(self, m_home, m_away):
@@ -334,7 +334,7 @@ class Solution:
     
     def get_stench(self, pheromones, game): # return how much would adding a certain game stinks
         # assume possible to set game
-        week_before = ((self.get_first_empty_week_index()- 2) % 6) + 1
+        week_before = ((self.get_first_empty_week_index()- 2) % (2 * (dim - 1))) + 1
         
         if self.get_games(week_before) == set():
             return t_max
@@ -347,7 +347,7 @@ class Solution:
     
     def update_pheromones(self, pheromones):
         for week in range(1, 2 * (self.dim) - 1):
-            week_before = ((week-2) % 6) + 1
+            week_before = ((week-2) % (2 * (dim - 1))) + 1
                         
             for g in self.get_games(week):
                 t1 = (g.m_away, self.get_game(week_before, g.m_away).m_home)
