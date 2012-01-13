@@ -340,7 +340,7 @@ class Solution:
             return t_max
         else:
             t1 = (game.m_away, game.m_home, self.get_game(week_before, game.m_away).m_home)
-            t2 = (g.m_home, game.m_home, self.get_game(week_before, game.m_home).m_home)
+            t2 = (game.m_home, game.m_home, self.get_game(week_before, game.m_home).m_home)
             #t_both = (t1, t2)
             #return pheromones[t_both]
             return (pheromones[t1] + pheromones[t2] ) / 2
