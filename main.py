@@ -26,9 +26,10 @@ import math
 import random
 import itertools
 import copy
+import operator
 from collections import defaultdict
 
-dim = 8
+dim = 4
 
 class Game:
     def __init__(self, m_home, m_away):
@@ -355,7 +356,7 @@ class Solution:
                 t_both = (t1, t2)
                 #pheromones[t1] *= 1.1
                 #pheromones[t2] *= 1.1
-                pheromones[t_both] *= 1.1
+                pheromones[t_both] *= 1.2
                 
     def __hash__(self):
         return hash(tuple(map(tuple, self.plan)))
@@ -370,7 +371,7 @@ stopping_criteria = lambda: iterations > 50
 
 
 (t_min, t_max) = (1.0, 10.0)
-(stench_power, local_info_power) = 8, 2
+(stench_power, local_info_power) = 3, 2
 pheromones = defaultdict(lambda: t_max)
 
 num_ants = 10
@@ -405,7 +406,7 @@ while not stopping_criteria():
                 s.unset_last_game()
                 continue
             
-            random.shuffle(decisions_list)
+            decisions_list = sorted(decisions_list, key = operator.itemgetter(0), reverse=True)
             random_value = random.random() * total_prob_value
             
             decision = None
@@ -420,7 +421,7 @@ while not stopping_criteria():
         val = s.evaluate() # if possible to evaluate solution
         if val != None and val < best_solution_value: # update bestw
             best_solution, best_solution_value = s, val
-            print(best_solution)
+            #print(best_solution)
             print(val)
     
     if best_solution.is_complete:        
@@ -429,11 +430,11 @@ while not stopping_criteria():
         best_solution.update_pheromones(pheromones)
     
     for i in pheromones: # evaporate pheromones
-        pheromones[i] *= 0.9
+        pheromones[i] *= 0.8
     
     iterations += 1
     
-print(pheromones)
+#print(pheromones)
      
 #===============================================================================
 # 
