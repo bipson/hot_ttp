@@ -26,6 +26,7 @@ import math
 import random
 import itertools
 import copy
+import operator
 from collections import defaultdict
 
 dim = 6
@@ -370,7 +371,7 @@ stopping_criteria = lambda: iterations > 40
 
 
 (t_min, t_max) = (1.0, 10.0)
-(stench_power, local_info_power) = 2, 1
+(stench_power, local_info_power) = 3, 2
 pheromones = defaultdict(lambda: t_max)
 
 num_ants = dim * 3
@@ -405,7 +406,9 @@ while not stopping_criteria():
                 s.unset_last_game()
                 continue
             
-            random.shuffle(decisions_list)
+            #random.shuffle(decisions_list)
+            decisions_list = sorted(decisions_list, key = operator.itemgetter(0), reverse=True)
+            #print("aaa: ", decisions_list)
             random_value = random.random() * total_prob_value
             
             decision = None
