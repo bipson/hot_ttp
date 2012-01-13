@@ -399,7 +399,7 @@ while not stopping_criteria():
             s += decision
         
         val = s.evaluate() # if possible to evaluate solution
-        if val != None and val > best_solution_value: # update bestw
+        if val != None and val < best_solution_value: # update bestw
             best_solution, best_solution_value = s, val
             
     pheromones[best_solution] += 1000/best_solution_value # update pheromones
