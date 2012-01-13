@@ -339,23 +339,23 @@ class Solution:
         if self.get_games(week_before) == set():
             return t_max
         else:
-            t1 = (game.m_away, game.m_home, self.get_game(week_before, game.m_away).m_home)
-            t2 = (game.m_home, game.m_home, self.get_game(week_before, game.m_home).m_home)
-            #t_both = (t1, t2)
-            #return pheromones[t_both]
-            return (pheromones[t1] + pheromones[t2] ) / 2
+            t1 = (game.m_away, self.get_game(week_before, game.m_away).m_home)
+            t2 = (game.m_home, self.get_game(week_before, game.m_home).m_home)
+            t_both = (t1, t2)
+            return pheromones[t_both]
+            #return (pheromones[t1] + pheromones[t2] ) / 2
     
     def update_pheromones(self, pheromones):
         for week in range(1, 2 * (self.dim) - 1):
             week_before = ((week-2) % 6) + 1
                         
             for g in self.get_games(week):
-                t1 = (g.m_away, g.m_home, self.get_game(week_before, g.m_away).m_home)
-                t2 = (g.m_home, g.m_home, self.get_game(week_before, g.m_home).m_home)
+                t1 = (g.m_away, self.get_game(week_before, g.m_away).m_home)
+                t2 = (g.m_home, self.get_game(week_before, g.m_home).m_home)
                 t_both = (t1, t2)
-                pheromones[t1] *= 0.2
-                pheromones[t2] *= 0.2
-                #pheromones[t_both] *= 0.1
+                #pheromones[t1] *= 1.1
+                #pheromones[t2] *= 1.1
+                pheromones[t_both] *= 1.1
                 
     def __hash__(self):
         return hash(tuple(map(tuple, self.plan)))
