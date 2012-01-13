@@ -29,7 +29,7 @@ import copy
 import operator
 from collections import defaultdict
 
-dim = 6
+dim = 8
 
 class Game:
     def __init__(self, m_home, m_away):
@@ -374,7 +374,7 @@ stopping_criteria = lambda: iterations > 40
 (stench_power, local_info_power) = 3, 2
 pheromones = defaultdict(lambda: t_max)
 
-num_ants = dim * 3
+num_ants = dim
 
 while not stopping_criteria():
     
