@@ -35,7 +35,7 @@ class Game:
         self.m_home = m_home
         self.m_away = m_away
     def __repr__(self):
-        return "(" + str(self.m_home) + " vs " + str(self.m_away) + ")"
+        return "(" + str(self.m_away) + " @ " + str(self.m_home) + ")"
     def copy(self):
         return Game(self.m_home, self.m_away)
     def invert(self): #inverts home and away team
@@ -334,10 +334,29 @@ class Solution:
     
     def get_stench(self, pheromones, game): # return how much would adding a certain game stinks
         # assume possible to set game
-        s = self.copy()
-        s.set_game(s.get_first_empty_week_index(), game)
-        return pheromones[s] 
+        week_before = ((self.get_first_empty_week_index()- 2) % 6) + 1
         
+        if self.get_games(week_before) == set():
+            return t_max
+        else:
+            t1 = (game.m_away, game.m_home, self.get_game(week_before, game.m_away).m_home)
+            t2 = (g.m_home, game.m_home, self.get_game(week_before, game.m_home).m_home)
+            #t_both = (t1, t2)
+            #return pheromones[t_both]
+            return (pheromones[t1] + pheromones[t2] ) / 2
+    
+    def update_pheromones(self, pheromones):
+        for week in range(1, 2 * (self.dim) - 1):
+            week_before = ((week-2) % 6) + 1
+                        
+            for g in self.get_games(week):
+                t1 = (g.m_away, g.m_home, self.get_game(week_before, g.m_away).m_home)
+                t2 = (g.m_home, g.m_home, self.get_game(week_before, g.m_home).m_home)
+                t_both = (t1, t2)
+                pheromones[t1] *= 0.2
+                pheromones[t2] *= 0.2
+                #pheromones[t_both] *= 0.1
+                
     def __hash__(self):
         return hash(tuple(map(tuple, self.plan)))
         
@@ -347,14 +366,14 @@ random.seed()
 
 iterations = 0
 
-stopping_criteria = lambda: iterations > 10
+stopping_criteria = lambda: iterations > 50
 
 
 (t_min, t_max) = (1.0, 10.0)
-(stench_power, local_info_power) = 2, 2
+(stench_power, local_info_power) = 8, 2
 pheromones = defaultdict(lambda: t_max)
 
-num_ants = 1
+num_ants = 10
 
 while not stopping_criteria():
     
@@ -399,15 +418,22 @@ while not stopping_criteria():
             s += decision
         
         val = s.evaluate() # if possible to evaluate solution
-        if val != None and val > best_solution_value: # update bestw
+        if val != None and val < best_solution_value: # update bestw
             best_solution, best_solution_value = s, val
-            
-    pheromones[best_solution] += 1000/best_solution_value # update pheromones
+            print(best_solution)
+            print(val)
+    
+    if best_solution.is_complete:        
+        #pheromones[best_solution] += 1000/best_solution_value # update pheromones
+        #pheromones[best_solution] += pheromones[best_solution]/10 # update pheromones
+        best_solution.update_pheromones(pheromones)
     
     for i in pheromones: # evaporate pheromones
         pheromones[i] *= 0.9
     
     iterations += 1
+    
+print(pheromones)
      
 #===============================================================================
 # 
