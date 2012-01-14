@@ -40,9 +40,15 @@ typedef Solution       * (* StepFunction)                (SolutionVector * solut
 
 typedef pair<int, int> IntPair;
 
+typedef pair<IntPair, IntPair> GamePair;
+
 map<IntPair, double> pheromones;
 map<IntPair, double>::const_iterator pheromones_iter;
 
+int total_items_on_ban_list = 0;
+
+// CONFIGURATION 
+int dim = 8;
 double pheromones_factor = 100;
 
 double pheromone_power  = 3;
@@ -56,7 +62,10 @@ double t_max = 30.0;
 double pheromone_evaporation_rate = 1.05;
 double pheromone_increase_rate    = 0.90;
 
-int num_ants = 80;
+int num_ants = 50;
+
+int k_flip_k = 2;
+int k_opt_k  = 1;
 
 class Solution
 {
@@ -238,6 +247,12 @@ public:
 		this->is_valid = s.is_valid;
 		//memset(plan, 0, sizeof(int) *  dim * ( 2 * (dim - 1) ));
 	};
+	
+	void DeletePlan()
+	{
+		delete this->plan;
+	}
+
 
 	int Evaluate() const
 	{
@@ -403,6 +418,8 @@ public:
 						//ban_list_away[ban_list_size++] = away_candidate;
 						ban_list_home.push_back(home_candidate);
 						ban_list_away.push_back(away_candidate);
+
+						total_items_on_ban_list++;
 					}
 				}
 				else // when no suitable candidate found, return failure
@@ -477,6 +494,8 @@ public:
 							if(!already_exists)
 								ss->push_back(ns);
 						}
+						else
+							ns.DeletePlan();
 					}
 				}
 			}
@@ -537,7 +556,8 @@ public:
 			a_limit = b_limit   + 1;
 			b_limit = ss.size() - 1;
 		}
-		
+		//ss.clear();
+
 		SolutionVector * proper_solution_vector = new SolutionVector;
 		
 		for(int i = 0; i < ss.size(); i++) // set i=1 instead of i=0 to ignore self 
@@ -547,6 +567,7 @@ public:
 				//if(ss[i] > *this) // ignore worse solutions?
 					proper_solution_vector->push_back(ss[i]);
 			}
+			ss[i].DeletePlan();
 		}
 		
 		return proper_solution_vector;
@@ -565,7 +586,7 @@ public:
 		}
 	};
 
-	void DisplaySolutionMatrix(int show_symmetry = 1, int show_team_names = 0) const
+	void DisplaySolutionMatrix(int show_symmetry = 1, int show_team_names = 1) const
 	{
 		// initialize team names
 		char * team_names[12];
@@ -614,13 +635,14 @@ public:
 				if (el == 0) cout << "-";
 				else
 				{
-					if(el < 0 && show_symmetry) cout << "@";
+					if(el < 0 && show_symmetry) cout << "@"; // di gaspero format
 
 					if(el > 0 || show_symmetry)		  
 					{
 						if(show_team_names)
 							cout << team_names[ABS(el) - 1];
-						else cout << el;
+						else 
+							cout << el;
 					}
 				}
 
@@ -665,6 +687,42 @@ public:
 
 			delete schedule_for_m;
 		}
+	}
+
+	void UpdatePheromones()
+	{
+		IntPair key;
+		/*
+		for(int m = 1; m <= dim; m++)
+		{
+			key.first = m;
+
+			int * schedule_for_m = new int[2 * (dim  - 1)];
+			
+			for(int w = 1; w <= 2 * (dim - 1); w++)
+				schedule_for_m[w - 1] = GetGame(w, m);
+						
+			for(int w = 1; w <= 2 * (dim - 1); w++)
+			{
+				key.second = schedule_for_m[w - 1];
+
+				IntPair k2;
+				k2.first = key.first;
+				k2.second = key.second;
+
+				double val = pheromones[key] * amount * pheromone_increase_rate;				
+				 // val = pheromones[key];
+				pheromones[key] = val;
+				
+				if(pheromones[key] < t_min)
+					pheromones[key] = t_min;
+
+				key.first = key.second; 
+			}
+
+			delete schedule_for_m;
+		}
+		*/
 	}
 
 	bool operator==(const Solution &other)
@@ -879,8 +937,11 @@ Solution * VND(Solution *initial, NeighbourStructure * neighbourhood_structures,
 			//cout << "    VND (Iteration " << ctr << "). No viable candidate found (considered one with distance " << current.Evaluate() << ". Solution space size: " << solspace->size() << "." << endl;
 			l++;
 		}
+
 		if(solspace)
+		{
 			delete solspace;
+		}
 	}
 
 	vnd_ctr += ctr;
@@ -937,7 +998,9 @@ Solution * GVNS(Solution *initial, NeighbourStructure * neighbourhood_structures
 			}
 
 			if(solspace)
+			{
 				delete solspace;
+			}
 		}
 	}
 
@@ -1227,9 +1290,7 @@ int ex1(int argc, char ** argv)
 }
 
 int main(int argc, char ** argv)
-{
-	int dim = 8;
-	
+{	
 	int start_time = time(NULL);
 	//srand(start_time);
 
@@ -1239,6 +1300,8 @@ int main(int argc, char ** argv)
 	Loader l(dim);
 	
 	l.Load(filename);
+
+	cout << k_flip_k << "-flip, " << k_opt_k << "-opt" << endl;
 
 	
 	pair<int, int> key;
@@ -1253,12 +1316,9 @@ int main(int argc, char ** argv)
 		}
 	}
 
-
-	int k_flip_k = 2;
-	int k_opt_k  = 1;
 	NeighbourStructure neighbourhood_structures[2] =
 	{
-		&Solution::Neighbourhood_k_Flip,
+		&Solution::Neighbourhood_k_Flip,		
 		&Solution::Neighbourhood_k_Opt,
 	};
 	int neighbour_structures_params[2] = {k_flip_k, k_opt_k};
@@ -1274,6 +1334,9 @@ int main(int argc, char ** argv)
 
 	double initial_sol_val = best_sol_val;
 
+	total_items_on_ban_list = 0;
+
+
 	for(int ant = 1; ant <= num_ants; ant++)
 	{
 		Solution s; // to every ant his own
@@ -1284,7 +1347,7 @@ int main(int argc, char ** argv)
 		//s.UpdatePheromones(pow( s.Evaluate() / initial_sol_val, pheromone_quotient_update_power));
 		s_after_gvns->UpdatePheromones(pow( s.Evaluate() / initial_sol_val, pheromone_quotient_update_power));
 
-		cout << ant << ": " << s_after_gvns->Evaluate() << endl;
+		cout << ant << ": " << s_after_gvns->Evaluate() << " (ban list size: " << total_items_on_ban_list << ")" << endl;
 
 		if(best_solution < *s_after_gvns)
 		{			
