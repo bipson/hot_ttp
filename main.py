@@ -355,6 +355,12 @@ class Solution:
                     pheromones[t] *= 0.8
                     if pheromones[t] < t_min:
                         pheromones[t] = t_min
+                        
+    def c_read_out(self):
+        for week in range(1, 2 * (best_overall.dim) - 1):
+            for g in best_overall.get_games(week):
+                print("foo.SetGame(", week,", ",g.m_home,", ",g.m_away,");", sep="")
+
                 
     def __hash__(self):
         return hash(tuple(map(tuple, self.plan)))
@@ -365,7 +371,7 @@ random.seed()
 
 iterations = 0
 
-stopping_criteria = lambda: iterations > 40 
+stopping_criteria = lambda: iterations > 50
 
 
 (t_min, t_max) = (1, 1500)
@@ -444,6 +450,12 @@ while not stopping_criteria():
 print(best_overall)
 print(best_overall_value)
 print(pheromones)
+
+best_overall.c_read_out()
+
+for week in range(1, 2 * (best_overall.dim) - 1):
+    for g in best_overall.get_games(week):
+        print("foo.SetGame(", week,", ",g.m_home,", ",g.m_away,");", sep="")
      
 #===============================================================================
 # 
