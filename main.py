@@ -452,10 +452,6 @@ print(best_overall_value)
 print(pheromones)
 
 best_overall.c_read_out()
-
-for week in range(1, 2 * (best_overall.dim) - 1):
-    for g in best_overall.get_games(week):
-        print("foo.SetGame(", week,", ",g.m_home,", ",g.m_away,");", sep="")
      
 #===============================================================================
 # 
