@@ -357,6 +357,8 @@ class Solution:
                     #print("before: ", week_before, g_before)
                     t = (g_before, g)
                     pheromones[t] *= 1.2
+                    if pheromones[t] > t_max:
+                        pheromones[t] = t_max
                 
     def __hash__(self):
         return hash(tuple(map(tuple, self.plan)))
@@ -371,7 +373,7 @@ stopping_criteria = lambda: iterations > 40
 
 
 (t_min, t_max) = (1.0, 10.0)
-(stench_power, local_info_power) = 3, 2
+(stench_power, local_info_power) = 4, 3
 pheromones = defaultdict(lambda: t_max)
 
 num_ants = dim
@@ -432,6 +434,8 @@ while not stopping_criteria():
     
     for i in pheromones: # evaporate pheromones
         pheromones[i] *= 0.8
+        if pheromones[i] < t_min:
+            pheromones[i] = t_min
     
     iterations += 1
     
